@@ -2,6 +2,8 @@ from google_play_scraper import app, reviews, Sort
 import pandas as pd
 import os
 from datetime import datetime
+from generate import create_analyze_file
+import asyncio
 
 def get_app_details(package_name, lang='ru', country='ru'):
     """Получить информацию о приложении"""
@@ -141,7 +143,7 @@ def main():
     PACKAGE_NAME = 'com.logistic.sdek'
     LANGUAGE = 'ru'
     COUNTRY = 'ru'
-    MAX_REVIEWS = 200
+    MAX_REVIEWS = int(input('Введите сколько нужно обработать комментариев: '))
     
     print("🚀 ЗАПУСК СБОРА ОТЗЫВОВ")
     print("=" * 40)
@@ -170,14 +172,16 @@ def main():
     show_examples(sorted_reviews)
     
     # Создаем папку для результатов
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M")
-    folder_name = f"reviews_{PACKAGE_NAME}_{timestamp}"
+    folder_name = f"reviews_{PACKAGE_NAME}"
     os.makedirs(folder_name, exist_ok=True)
     
     # Сохраняем данные
     save_reviews_to_csv(sorted_reviews, folder_name)
     save_all_reviews_csv(sorted_reviews, folder_name)
     create_simple_report(sorted_reviews, app_details['title'], PACKAGE_NAME, folder_name)
+    
+    print("\n🤖 Запускаем AI анализ...")
+    asyncio.run(create_analyze_file())
     
     print(f"\n🎉 ГОТОВО!")
     print(f"📁 Файлы сохранены в папку: {folder_name}")
